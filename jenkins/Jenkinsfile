@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_REPO = 'https://github.com/Equipo4DevSecOps/todo-app.git'
+        INFRA_REPO = 'https://github.com/Equipo4DevSecOps/devsecops-infra.git'
+        SERVER_USER = 'ubuntu'
+        SERVER_IP = '136.248.244.232'
+        DEPLOY_PATH = '/var/www/todo-app'
+    }
+
+    stages {
+
+        stage('Checkout App Code') {
+            steps {
+                git url: "${APP_REPO}", branch: 'main'
+            }
+        }
+
+        stage('SAST - Static Analysis') {
+            steps {
+                sh 'bash security/sast.sh'
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh '''
+                ansible-playbook ansible/deploy.yml \
+                -i ansible/inventory.ini
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deploy completed successfully'
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
