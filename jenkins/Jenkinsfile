@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GITHUB_PAT = credentials('github-pat')  // ID de la credencial en Jenkins
+        GITHUB_PAT = credentials('github-pat-todo')  // ID de la credencial en Jenkins
     }
 
     stages {
