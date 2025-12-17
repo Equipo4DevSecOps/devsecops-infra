@@ -20,7 +20,7 @@
 
     - name: Create app directory
       file:
-        path: /var/www/todo-app
+        path: /var/www/html/todo-app
         state: directory
         owner: www-data
         group: www-data
@@ -29,13 +29,13 @@
     - name: Copy application files
       copy:
         src: ../
-        dest: /var/www/todo-app
+        dest: /var/www/html/todo-app
         owner: www-data
         group: www-data
 
     - name: Set correct permissions
       file:
-        path: /var/www/todo-app
+        path: /var/www/html/todo-app
         recurse: yes
         owner: www-data
         group: www-data
