@@ -2,41 +2,35 @@ pipeline {
     agent any
 
     environment {
-        APP_REPO = 'https://github.com/Equipo4DevSecOps/todo-app.git'
-        INFRA_REPO = 'https://github.com/Equipo4DevSecOps/devsecops-infra.git'
-        SERVER_USER = 'ubuntu'
-        SERVER_IP = '136.248.244.232'
-        DEPLOY_PATH = '/var/www/todo-app'
+        GITHUB_PAT = credentials('github-pat')  // ID de la credencial en Jenkins
     }
 
     stages {
-
-        stage('Checkout App Code') {
+        stage('Checkout Infra') {
             steps {
-                git url: "${APP_REPO}", branch: 'main'
+                checkout([$class: 'GitSCM',
+                          branches: [[name: 'main']],
+                          userRemoteConfigs: [[url: 'https://github.com/Equipo4DevSecOps/devsecops-infra.git',
+                                               credentialsId: 'github-pat']]])
             }
         }
 
-        stage('SAST - Static Analysis') {
+        stage('Checkout App Code') {
+            steps {
+                sh 'git clone https://$GITHUB_PAT@github.com/Equipo4DevSecOps/todo-app.git || echo "Repo already exists"'
+            }
+        }
+
+        stage('SAST') {
             steps {
                 sh 'bash security/sast.sh'
             }
         }
 
         stage('Deploy with Ansible') {
-			steps {
-				sh 'ansible-playbook ansible/deploy.yml -i ansible/inventory.ini'
-			}
-		}
-
-    }
-
-    post {
-        success {
-            echo 'Deploy completed successfully'
-        }
-        failure {
-            echo 'Pipeline failed'
+            steps {
+                sh 'ansible-playbook ansible/deploy.yml -i ansible/inventory.ini'
+            }
         }
     }
 }
