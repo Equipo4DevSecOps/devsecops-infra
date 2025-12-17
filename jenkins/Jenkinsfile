@@ -16,10 +16,21 @@ pipeline {
         }
 
         stage('Checkout App Code') {
-            steps {
-                sh 'git clone https://$GITHUB_PAT@github.com/Equipo4DevSecOps/todo-app.git || echo "Repo already exists"'
-            }
-        }
+			steps {
+				sh '''
+				if [ -d "todo-app/.git" ]; then
+					echo "Repo already exists, pulling latest changes"
+					cd todo-app
+					git reset --hard
+					git clean -fd
+					git pull origin main
+					cd ..
+				else
+					git clone https://$GITHUB_PAT@github.com/Equipo4DevSecOps/todo-app.git
+				fi
+				'''
+			}
+		}
 
         stage('SAST') {
             steps {
